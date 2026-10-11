@@ -35,7 +35,7 @@ cd rudy-breach-checker
 npm install
 ```
 
-Set the local placeholders in `index.js`: `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API`. The endpoint must accept `?check=...` and return the response shape expected by `createEmbed`. The code does not implement a provider API-key header automatically.
+Set the `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API` environment variables (for example `DISCORD_TOKEN=... CLIENT_ID=... LEAKCHECK_API=... node index.js`). The placeholders in `index.js` are only used as a fallback. The endpoint must accept `?check=...` and return the response shape expected by `createEmbed`. The code does not implement a provider API-key header automatically.
 
 ```bash
 node index.js
@@ -47,7 +47,7 @@ Invite the bot with `bot` and `applications.commands` scopes. Test with a consen
 
 - This repository contains a provider adapter, not a breach database. A `found: false` response does not establish that an account is safe or absent from every breach.
 - `/hashmail` hashes the full email with SHA-256. It is not a k-anonymity protocol; only providers supporting that hash format can return useful matches.
-- Queries go to the configured provider and results are visible in the Discord channel. Avoid submitting another person's personal information without permission.
+- Queries go to the configured provider and results are shown only to the user who ran the command (ephemeral replies). Malformed email addresses are rejected before any API call. Avoid submitting another person's personal information without permission.
 - The HTTP request has no explicit timeout and long provider responses may exceed embed limits. Live provider authentication and behavior were not tested in this documentation review.
 
 ## Project map
