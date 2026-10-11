@@ -35,7 +35,7 @@ cd rudy-breach-checker
 npm install
 ```
 
-Set the `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API` environment variables (for example `DISCORD_TOKEN=... CLIENT_ID=... LEAKCHECK_API=... node index.js`). The placeholders in `index.js` are only used as a fallback. The endpoint must accept `?check=...` and return the response shape expected by `createEmbed`. The code does not implement a provider API-key header automatically.
+Set the `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API` environment variables (for example `DISCORD_TOKEN=... CLIENT_ID=... LEAKCHECK_API=... node index.js`). Startup rejects missing configuration before connecting to Discord. The endpoint must accept `?check=...` and return the response shape expected by `createEmbed`. The code does not implement a provider API-key header automatically.
 
 ```bash
 node index.js
@@ -57,6 +57,22 @@ index.js       Slash commands, query adapter, hashing and embeds
 package.json   Discord dependency
 raven.png      Required startup asset
 ```
+
+## GitHub package
+
+A non-root container is published to GitHub Packages after build and offline configuration checks. Credentials are supplied at runtime and are excluded from the image.
+
+```sh
+cp .env.example .env
+# Fill in your own values in .env, keeping that file private.
+docker run --rm --env-file .env ghcr.io/r4venrudy/rudy-breach-checker:latest --check-config
+docker run --rm --env-file .env ghcr.io/r4venrudy/rudy-breach-checker:latest
+```
+
+`--check-config` validates installed dependencies, the bundled asset, and required settings without connecting to Discord. `RUDY_CONFIG` optionally points to a mounted JSON configuration file; environment variables take priority.
+
+Only public project files are packaged. Image tags are `latest` and `sha-<full commit SHA>`. Discord login and external API behavior still require your own account configuration; CI never uses live credentials.
+
 
 ## License
 
