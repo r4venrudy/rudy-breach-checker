@@ -105,7 +105,7 @@ function createEmbed(data, query, type) {
   if (data.found && data.fields) {
     embed.addFields({
       name: '📊 Exposed Data',
-      value: `\`${Array.isArray(data.fields) ? data.fields.join(', ') : data.fields}\``
+      value: `\`${String(Array.isArray(data.fields) ? data.fields.join(', ') : data.fields).slice(0, 1000)}\``
     });
   }
 
