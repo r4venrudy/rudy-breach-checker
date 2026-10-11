@@ -24,9 +24,10 @@ try {
 const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Routes } = require('discord.js');
 const crypto = require('crypto');
 
-const DISCORD_TOKEN = 'DISCORD BOT TOKEN HERE';
-const CLIENT_ID = 'CLIENT ID HERE';
-const LEAKCHECK_API = 'LEAKCHECK API URL';
+// Prefer environment variables so secrets don't have to live in the source file.
+const DISCORD_TOKEN = process.env.DISCORD_TOKEN || 'DISCORD BOT TOKEN HERE';
+const CLIENT_ID = process.env.CLIENT_ID || 'CLIENT ID HERE';
+const LEAKCHECK_API = process.env.LEAKCHECK_API || 'LEAKCHECK API URL';
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
