@@ -49,6 +49,21 @@ async function checkLeak(query) {
   }
 }
 
+function chunkLines(lines, limit) {
+  const chunks = [];
+  let cur = '';
+  for (let line of lines) {
+    if (line.length > limit) line = line.slice(0, limit - 1) + '…';
+    if (cur && cur.length + line.length + 1 > limit) {
+      chunks.push(cur);
+      cur = '';
+    }
+    cur += (cur ? '\n' : '') + line;
+  }
+  if (cur) chunks.push(cur);
+  return chunks;
+}
+
 function createEmbed(data, query, type) {
   const embed = new EmbedBuilder()
     .setColor(data.found ? '#ff0000' : '#00ff00')
@@ -67,46 +82,23 @@ function createEmbed(data, query, type) {
   );
 
   if (data.found && data.sources) {
-    let breachList = '';
-
-    if (Array.isArray(data.sources)) {
-      breachList = data.sources.map((s, i) => {
-        if (typeof s === 'object' && s.name) {
-          return `${i + 1}. ${s.name}${s.date ? ` (${s.date})` : ''}`;
-        }
-        return `${i + 1}. ${s}`;
-      }).join('\n');
-    } else if (typeof data.sources === 'object' && data.sources.name) {
-      breachList = `1. ${data.sources.name}${data.sources.date ? ` (${data.sources.date})` : ''}`;
-    } else {
-      breachList = data.sources;
-    }
-
-    if (breachList.length > 1024) {
-      const arr = Array.isArray(data.sources) ? data.sources : [data.sources];
-      const mid = Math.ceil(arr.length / 2);
-
-      const p1 = arr.slice(0, mid).map((b, i) =>
-        typeof b === 'object' && b.name
-          ? `${i + 1}. ${b.name}${b.date ? ` (${b.date})` : ''}`
-          : `${i + 1}. ${b}`
-      ).join('\n');
-
-      const p2 = arr.slice(mid).map((b, i) =>
-        typeof b === 'object' && b.name
-          ? `${mid + i + 1}. ${b.name}${b.date ? ` (${b.date})` : ''}`
-          : `${mid + i + 1}. ${b}`
-      ).join('\n');
-
-      embed.addFields(
-        { name: '📋 Breaches Found (Part 1)', value: p1 || 'None' },
-        { name: '📋 Breaches Found (Part 2)', value: p2 || 'None' }
-      );
-    } else {
+    const arr = Array.isArray(data.sources) ? data.sources : [data.sources];
+    const lines = arr.map((s, i) =>
+      typeof s === 'object' && s && s.name
+        ? `${i + 1}. ${s.name}${s.date ? ` (${s.date})` : ''}`
+        : `${i + 1}. ${s}`
+    );
+    const parts = chunkLines(lines, 1024);
+    // An embed holds 25 fields; 3 are used above and 1 is kept for exposed data.
+    const shown = parts.slice(0, 20);
+    shown.forEach((value, i) => {
       embed.addFields({
-        name: `📋 Breaches Found (${Array.isArray(data.sources) ? data.sources.length : 1})`,
-        value: breachList
+        name: shown.length === 1 ? `📋 Breaches Found (${arr.length})` : `📋 Breaches Found (Part ${i + 1})`,
+        value
       });
+    });
+    if (parts.length > shown.length) {
+      embed.setFooter({ text: `${parts.length - shown.length} more part(s) not shown` });
     }
   }
 
