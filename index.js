@@ -25,9 +25,11 @@ const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Rout
 const crypto = require('crypto');
 
 // Prefer environment variables so secrets don't have to live in the source file.
-const DISCORD_TOKEN = process.env.DISCORD_TOKEN || 'DISCORD BOT TOKEN HERE';
-const CLIENT_ID = process.env.CLIENT_ID || 'CLIENT ID HERE';
-const LEAKCHECK_API = process.env.LEAKCHECK_API || 'LEAKCHECK API URL';
+const { loadConfig } = require('./packaging/config.cjs');
+const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
+const apiUrl = new URL(LEAKCHECK_API);
+if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
+if (process.argv.includes('--check-config')) { console.log('Configuration and dependencies ready'); process.exit(0); }
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]

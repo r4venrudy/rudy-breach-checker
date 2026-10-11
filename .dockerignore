@@ -1,0 +1,11 @@
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!index.js
+!raven.png
+!LICENSE
+!packaging/
+!packaging/**
+**/__pycache__
+**/*.pyc
