@@ -155,7 +155,8 @@ client.on('interactionCreate', async interaction => {
     return;
   }
 
-  await interaction.deferReply();
+  // Breach results about a person's email are sensitive: show them only to the requester.
+  await interaction.deferReply({ ephemeral: true });
 
   let query, type, result;
 
