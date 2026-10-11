@@ -144,8 +144,17 @@ client.once('ready', () => {
   console.log(`Bot aktif: ${client.user.tag}`);
 });
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+
+  const email = interaction.options.getString('email');
+  if (email !== null && !EMAIL_RE.test(email.trim())) {
+    await interaction.reply({ content: '❌ That does not look like an email address.', ephemeral: true });
+    return;
+  }
+
   await interaction.deferReply();
 
   let query, type, result;
