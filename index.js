@@ -40,10 +40,11 @@ function hashEmail(email) {
 async function checkLeak(query) {
   try {
     const url = `${LEAKCHECK_API}?check=${encodeURIComponent(query)}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
     if (!response.ok) return { error: `API returned status ${response.status}` };
     return await response.json();
   } catch (e) {
+    if (e.name === 'TimeoutError') return { error: 'Breach API did not answer within 15 seconds' };
     return { error: e.message };
   }
 }
