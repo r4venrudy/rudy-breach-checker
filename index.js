@@ -41,7 +41,8 @@ function hashEmail(email) {
 
 async function checkLeak(query) {
   try {
-    const url = `${LEAKCHECK_API}?check=${encodeURIComponent(query)}`;
+    const url = new URL(apiUrl);
+    url.searchParams.set('check', query);
     const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
     if (!response.ok) return { error: `API returned status ${response.status}` };
     return await response.json();
