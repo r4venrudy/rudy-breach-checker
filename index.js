@@ -187,4 +187,9 @@ client.on('interactionCreate', async interaction => {
   await interaction.editReply({ embeds: [embed] });
 });
 
-registerCommands().then(() => client.login(DISCORD_TOKEN));
+registerCommands()
+  .then(() => client.login(DISCORD_TOKEN))
+  .catch(err => {
+    console.error(`Startup failed: ${err.message}`);
+    process.exit(1);
+  });
