@@ -153,13 +153,19 @@ client.on('interactionCreate', async interaction => {
     return;
   }
 
+  const username = interaction.options.getString('username');
+  if (username !== null && !username.trim()) {
+    await interaction.reply({ content: '❌ Username cannot be empty.', ephemeral: true });
+    return;
+  }
+
   // Breach results about a person's email are sensitive: show them only to the requester.
   await interaction.deferReply({ ephemeral: true });
 
   let query, type, result;
 
   if (interaction.commandName === 'mail') {
-    query = interaction.options.getString('email');
+    query = interaction.options.getString('email').trim().toLowerCase();
     type = 'Email';
     result = await checkLeak(query);
   }
@@ -172,7 +178,7 @@ client.on('interactionCreate', async interaction => {
   }
 
   if (interaction.commandName === 'usernamev2') {
-    query = interaction.options.getString('username');
+    query = interaction.options.getString('username').trim();
     type = 'Username';
     result = await checkLeak(query);
   }
