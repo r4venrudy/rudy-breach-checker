@@ -44,7 +44,11 @@ async function checkLeak(query) {
   try {
     const url = new URL(apiUrl);
     url.searchParams.set('check', query);
-    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    // Optional provider API key, sent as a header so it never appears in URLs or logs
+    const headers = process.env.LEAKCHECK_API_KEY
+      ? { [process.env.LEAKCHECK_API_KEY_HEADER || 'X-API-Key']: process.env.LEAKCHECK_API_KEY }
+      : {};
+    const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
     if (!response.ok) return { error: `API returned status ${response.status}` };
     return await response.json();
   } catch (e) {

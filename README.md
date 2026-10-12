@@ -35,7 +35,7 @@ cd rudy-breach-checker
 npm install
 ```
 
-Set the `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API` environment variables (for example `DISCORD_TOKEN=... CLIENT_ID=... LEAKCHECK_API=... node index.js`). Startup rejects missing configuration before connecting to Discord. The endpoint must accept `?check=...` and return the response shape expected by `createEmbed`. The code does not implement a provider API-key header automatically.
+Set the `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API` environment variables (for example `DISCORD_TOKEN=... CLIENT_ID=... LEAKCHECK_API=... node index.js`). Startup rejects missing configuration before connecting to Discord. The endpoint must accept `?check=...` and return the response shape expected by `createEmbed`. If your provider needs a key, set `LEAKCHECK_API_KEY` (sent as the `X-API-Key` header, or the header named in `LEAKCHECK_API_KEY_HEADER`), so the key stays out of the URL.
 
 ```bash
 node index.js
