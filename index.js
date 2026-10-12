@@ -46,7 +46,10 @@ async function checkLeak(query) {
       : {};
     const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
     if (!response.ok) return { error: `API returned status ${response.status}` };
-    return await response.json();
+    const data = await response.json().catch(() => null);
+    // createEmbed relies on a boolean "found"; anything else means the provider speaks a different format
+    if (!data || typeof data.found !== 'boolean') return { error: 'Unexpected response from the breach API (missing "found")' };
+    return data;
   } catch (e) {
     if (e.name === 'TimeoutError') return { error: 'Breach API did not answer within 15 seconds' };
     return { error: e.message };
