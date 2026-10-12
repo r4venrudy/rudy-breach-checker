@@ -82,8 +82,15 @@ function createEmbed(data, query, type) {
         : `${i + 1}. ${s}`
     );
     const parts = chunkLines(lines, 1024);
-    // An embed holds 25 fields; 3 are used above and 1 is kept for exposed data.
-    const shown = parts.slice(0, 20);
+    // Discord rejects embeds over 6000 characters in total, so stop adding breach
+    // fields at ~4500 characters to leave room for the title, other fields and footer.
+    const shown = [];
+    let used = 0;
+    for (const part of parts) {
+      if (used + part.length > 4500) break;
+      shown.push(part);
+      used += part.length;
+    }
     shown.forEach((value, i) => {
       embed.addFields({
         name: shown.length === 1 ? `📋 Breaches Found (${arr.length})` : `📋 Breaches Found (Part ${i + 1})`,
