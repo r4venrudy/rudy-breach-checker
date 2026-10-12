@@ -19,3 +19,12 @@ test('truncates a single over-long line', () => {
 test('empty input gives no chunks', () => {
   assert.deepStrictEqual(chunkLines([], 1024), []);
 });
+
+const { sourceLines } = require('./format.cjs');
+
+test('sourceLines numbers strings and named objects', () => {
+  assert.deepStrictEqual(
+    sourceLines(['Adobe', { name: 'LinkedIn', date: '2016-05' }, { name: 'Canva' }, { id: 7 }]),
+    ['1. Adobe', '2. LinkedIn (2016-05)', '3. Canva', '4. {"id":7}']
+  );
+});
