@@ -26,7 +26,7 @@ const crypto = require('crypto');
 
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
-const { chunkLines } = require('./packaging/format.cjs');
+const { chunkLines, sourceLines } = require('./packaging/format.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
 if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
@@ -76,11 +76,7 @@ function createEmbed(data, query, type) {
 
   if (data.found && data.sources) {
     const arr = Array.isArray(data.sources) ? data.sources : [data.sources];
-    const lines = arr.map((s, i) =>
-      typeof s === 'object' && s && s.name
-        ? `${i + 1}. ${s.name}${s.date ? ` (${s.date})` : ''}`
-        : `${i + 1}. ${s}`
-    );
+    const lines = sourceLines(arr);
     const parts = chunkLines(lines, 1024);
     // Discord rejects embeds over 6000 characters in total, so stop adding breach
     // fields at ~4500 characters to leave room for the title, other fields and footer.
