@@ -141,8 +141,11 @@ client.once('ready', () => {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const COMMANDS = new Set(['mail', 'hashmail', 'usernamev2']);
+
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+  if (!COMMANDS.has(interaction.commandName)) return;
 
   const email = interaction.options.getString('email');
   if (email !== null && !EMAIL_RE.test(email.trim())) {
