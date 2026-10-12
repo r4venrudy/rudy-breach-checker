@@ -59,7 +59,7 @@ async function checkLeak(query) {
 
 function createEmbed(data, query, type) {
   const embed = new EmbedBuilder()
-    .setColor(data.found ? '#ff0000' : '#00ff00')
+    .setColor(data.error ? '#ffa500' : data.found ? '#ff0000' : '#00ff00')
     .setTitle('🔍 Rudy Breach Checker')
     .setTimestamp();
 
