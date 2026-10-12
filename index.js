@@ -26,6 +26,7 @@ const crypto = require('crypto');
 
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
+const { chunkLines } = require('./packaging/format.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
 if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
@@ -50,21 +51,6 @@ async function checkLeak(query) {
     if (e.name === 'TimeoutError') return { error: 'Breach API did not answer within 15 seconds' };
     return { error: e.message };
   }
-}
-
-function chunkLines(lines, limit) {
-  const chunks = [];
-  let cur = '';
-  for (let line of lines) {
-    if (line.length > limit) line = line.slice(0, limit - 1) + '…';
-    if (cur && cur.length + line.length + 1 > limit) {
-      chunks.push(cur);
-      cur = '';
-    }
-    cur += (cur ? '\n' : '') + line;
-  }
-  if (cur) chunks.push(cur);
-  return chunks;
 }
 
 function createEmbed(data, query, type) {
