@@ -22,11 +22,10 @@ try {
 }
 
 const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Routes } = require('discord.js');
-const crypto = require('crypto');
 
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
-const { chunkLines, sourceLines } = require('./packaging/format.cjs');
+const { chunkLines, sourceLines, hashEmail } = require('./packaging/format.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
 if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
@@ -36,9 +35,6 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
-function hashEmail(email) {
-  return crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
-}
 
 async function checkLeak(query) {
   try {

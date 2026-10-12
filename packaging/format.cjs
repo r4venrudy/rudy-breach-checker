@@ -1,3 +1,10 @@
+const crypto = require('node:crypto');
+
+// SHA-256 of the trimmed, lowercased address (what /hashmail sends instead of the email)
+function hashEmail(email) {
+  return crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+}
+
 // Packs lines into Discord embed field values (max 1024 characters each).
 function chunkLines(lines, limit) {
   const chunks = [];
@@ -23,4 +30,4 @@ function sourceLines(sources) {
   );
 }
 
-module.exports = { chunkLines, sourceLines };
+module.exports = { chunkLines, sourceLines, hashEmail };
