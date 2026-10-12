@@ -28,3 +28,11 @@ test('sourceLines numbers strings and named objects', () => {
     ['1. Adobe', '2. LinkedIn (2016-05)', '3. Canva', '4. {"id":7}']
   );
 });
+
+const { hashEmail } = require('./format.cjs');
+
+test('hashEmail normalizes before hashing', () => {
+  const expected = '973dfe463ec85785f5f95af5ba3906eedb2d931c24e69824a89ea65dba4e813b';
+  assert.strictEqual(hashEmail('test@example.com'), expected);
+  assert.strictEqual(hashEmail('  Test@Example.COM '), expected);
+});
