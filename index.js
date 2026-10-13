@@ -26,6 +26,7 @@ const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Rout
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
 const { chunkLines, sourceLines, hashEmail, codeSpan } = require('./packaging/format.cjs');
+const { createCooldown } = require('./packaging/cooldown.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
 if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
@@ -133,6 +134,8 @@ client.once('ready', () => {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const cooldown = createCooldown(Number(process.env.COOLDOWN_SECONDS || 10) * 1000);
+
 const COMMANDS = new Set(['mail', 'hashmail', 'usernamev2']);
 
 async function handleCommand(interaction) {
@@ -148,6 +151,12 @@ async function handleCommand(interaction) {
   const username = interaction.options.getString('username');
   if (username !== null && !username.trim()) {
     await interaction.reply({ content: '❌ Username cannot be empty.', ephemeral: true });
+    return;
+  }
+
+  const wait = cooldown.take(interaction.user.id);
+  if (wait > 0) {
+    await interaction.reply({ content: `⏳ Please wait ${Math.ceil(wait / 1000)} s before the next lookup.`, ephemeral: true });
     return;
   }
 

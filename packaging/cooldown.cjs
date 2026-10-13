@@ -1,0 +1,18 @@
+// Per-user cooldown so one person can't burn through the breach API quota by spamming commands.
+function createCooldown(ms, now = () => Date.now()) {
+  const last = new Map();
+  return {
+    // Returns 0 and records the use when allowed, otherwise the milliseconds left to wait
+    take(userId) {
+      const t = now();
+      const left = (last.get(userId) ?? -Infinity) + ms - t;
+      if (left > 0) return left;
+      last.set(userId, t);
+      // keep the map small: drop entries whose cooldown has long expired
+      if (last.size > 1000) for (const [id, at] of last) if (t - at >= ms) last.delete(id);
+      return 0;
+    }
+  };
+}
+
+module.exports = { createCooldown };
