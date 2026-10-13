@@ -111,15 +111,15 @@ const commands = [
   new SlashCommandBuilder()
     .setName('mail')
     .setDescription('Search for leaks by email address')
-    .addStringOption(o => o.setName('email').setDescription('Email').setRequired(true)),
+    .addStringOption(o => o.setName('email').setDescription('Email').setRequired(true).setMaxLength(254)),
   new SlashCommandBuilder()
     .setName('hashmail')
     .setDescription('Search for leaks by hashed email (SHA256)')
-    .addStringOption(o => o.setName('email').setDescription('Email').setRequired(true)),
+    .addStringOption(o => o.setName('email').setDescription('Email').setRequired(true).setMaxLength(254)),
   new SlashCommandBuilder()
     .setName('usernamev2')
     .setDescription('Search for leaks by username')
-    .addStringOption(o => o.setName('username').setDescription('Username').setRequired(true))
+    .addStringOption(o => o.setName('username').setDescription('Username').setRequired(true).setMaxLength(64))
 ];
 
 async function registerCommands() {
