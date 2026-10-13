@@ -25,6 +25,7 @@ A Discord bot that sends email, hashed-email or username queries to a configured
 | `/usernamev2` | Queries a supplied username (blank input is rejected) |
 | Response | Displays source names/dates and exposed-field labels when returned by the provider, only to the user who asked (ephemeral) |
 | Colors | Red = found in breaches, green = not found, orange = API error or unexpected response |
+| Limits | Each user waits `COOLDOWN_SECONDS` (default 10) between lookups; emails are capped at 254 characters and usernames at 64 |
 
 ## Quick start
 
@@ -49,7 +50,7 @@ Invite the bot with `bot` and `applications.commands` scopes. Test with a consen
 - This repository contains a provider adapter, not a breach database. A `found: false` response does not establish that an account is safe or absent from every breach.
 - `/hashmail` hashes the full email with SHA-256. It is not a k-anonymity protocol; only providers supporting that hash format can return useful matches.
 - Queries go to the configured provider and results are shown only to the user who ran the command (ephemeral replies). Malformed email addresses are rejected before any API call. Avoid submitting another person's personal information without permission.
-- The HTTP request has no explicit timeout and long provider responses may exceed embed limits. Live provider authentication and behavior were not tested in this documentation review.
+- Requests time out after 15 seconds, network failures name their cause (for example `ENOTFOUND`), and long source lists are cut to fit Discord's embed limit with a "more part(s) not shown" footer. Live provider authentication and behavior were not tested in this documentation review.
 
 ## Project map
 
