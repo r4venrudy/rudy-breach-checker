@@ -135,7 +135,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const COMMANDS = new Set(['mail', 'hashmail', 'usernamev2']);
 
-client.on('interactionCreate', async interaction => {
+async function handleCommand(interaction) {
   if (!interaction.isChatInputCommand()) return;
   if (!COMMANDS.has(interaction.commandName)) return;
 
@@ -177,6 +177,15 @@ client.on('interactionCreate', async interaction => {
 
   const embed = createEmbed(result, query, type);
   await interaction.editReply({ embeds: [embed] });
+}
+
+client.on('interactionCreate', async interaction => {
+  // An unhandled rejection (expired interaction, Discord outage) would crash the whole bot on Node 15+
+  try {
+    await handleCommand(interaction);
+  } catch (err) {
+    console.error(`/${interaction.commandName} failed:`, err);
+  }
 });
 
 registerCommands()
