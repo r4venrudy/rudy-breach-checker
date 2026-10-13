@@ -25,7 +25,7 @@ const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Rout
 
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
-const { chunkLines, sourceLines, hashEmail } = require('./packaging/format.cjs');
+const { chunkLines, sourceLines, hashEmail, codeSpan } = require('./packaging/format.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
 if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
@@ -68,7 +68,7 @@ function createEmbed(data, query, type) {
   }
 
   embed.addFields(
-    { name: 'Query', value: `\`${query}\``, inline: true },
+    { name: 'Query', value: codeSpan(query), inline: true },
     { name: 'Type', value: type, inline: true },
     { name: 'Status', value: data.found ? '✅ Found in Breaches' : '❌ Not Found', inline: true }
   );

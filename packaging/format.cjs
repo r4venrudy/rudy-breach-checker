@@ -30,4 +30,10 @@ function sourceLines(sources) {
   );
 }
 
-module.exports = { chunkLines, sourceLines, hashEmail };
+// Inline code that survives backticks in user input: Discord accepts ``x`y`` like CommonMark
+function codeSpan(text) {
+  const t = String(text);
+  return t.includes('`') ? `\`\` ${t.replace(/``+/g, m => m.split('').join('\u200b'))} \`\`` : `\`${t}\``;
+}
+
+module.exports = { chunkLines, sourceLines, hashEmail, codeSpan };

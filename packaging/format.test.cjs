@@ -36,3 +36,11 @@ test('hashEmail normalizes before hashing', () => {
   assert.strictEqual(hashEmail('test@example.com'), expected);
   assert.strictEqual(hashEmail('  Test@Example.COM '), expected);
 });
+
+const { codeSpan } = require('./format.cjs');
+
+test('codeSpan keeps backticks in user input from breaking the formatting', () => {
+  assert.strictEqual(codeSpan('raven'), '`raven`');
+  assert.strictEqual(codeSpan('ra`ven'), '`` ra`ven ``');
+  assert.ok(!codeSpan('a``b').slice(3, -3).includes('``'));
+});
