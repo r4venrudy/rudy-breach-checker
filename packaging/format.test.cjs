@@ -44,3 +44,13 @@ test('codeSpan keeps backticks in user input from breaking the formatting', () =
   assert.strictEqual(codeSpan('ra`ven'), '`` ra`ven ``');
   assert.ok(!codeSpan('a``b').slice(3, -3).includes('``'));
 });
+
+const { fitParts } = require('./format.cjs');
+
+test('fitParts stops before the embed budget and counts what was left out', () => {
+  const parts = ['a'.repeat(1000), 'b'.repeat(1000), 'c'.repeat(1000), 'd'.repeat(1000), 'e'.repeat(1000)];
+  const { shown, hidden } = fitParts(parts);
+  assert.strictEqual(shown.length, 4);
+  assert.strictEqual(hidden, 1);
+  assert.deepStrictEqual(fitParts([]), { shown: [], hidden: 0 });
+});

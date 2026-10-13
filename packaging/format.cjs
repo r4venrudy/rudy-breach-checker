@@ -36,4 +36,17 @@ function codeSpan(text) {
   return t.includes('`') ? `\`\` ${t.replace(/``+/g, m => m.split('').join('\u200b'))} \`\`` : `\`${t}\``;
 }
 
-module.exports = { chunkLines, sourceLines, hashEmail, codeSpan };
+// Discord rejects embeds over 6000 characters in total, so keep field values only up to `budget`
+// characters (leaving room for the title, the other fields and the footer).
+function fitParts(parts, budget = 4500) {
+  const shown = [];
+  let used = 0;
+  for (const part of parts) {
+    if (used + part.length > budget) break;
+    shown.push(part);
+    used += part.length;
+  }
+  return { shown, hidden: parts.length - shown.length };
+}
+
+module.exports = { chunkLines, sourceLines, hashEmail, codeSpan, fitParts };

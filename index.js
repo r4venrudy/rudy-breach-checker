@@ -25,7 +25,7 @@ const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Rout
 
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
-const { chunkLines, sourceLines, hashEmail, codeSpan } = require('./packaging/format.cjs');
+const { chunkLines, sourceLines, hashEmail, codeSpan, fitParts } = require('./packaging/format.cjs');
 const { createCooldown } = require('./packaging/cooldown.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
@@ -81,23 +81,15 @@ function createEmbed(data, query, type) {
     const arr = Array.isArray(data.sources) ? data.sources : [data.sources];
     const lines = sourceLines(arr);
     const parts = chunkLines(lines, 1024);
-    // Discord rejects embeds over 6000 characters in total, so stop adding breach
-    // fields at ~4500 characters to leave room for the title, other fields and footer.
-    const shown = [];
-    let used = 0;
-    for (const part of parts) {
-      if (used + part.length > 4500) break;
-      shown.push(part);
-      used += part.length;
-    }
+    const { shown, hidden } = fitParts(parts);
     shown.forEach((value, i) => {
       embed.addFields({
         name: shown.length === 1 ? `📋 Breaches Found (${arr.length})` : `📋 Breaches Found (Part ${i + 1})`,
         value
       });
     });
-    if (parts.length > shown.length) {
-      embed.setFooter({ text: `${parts.length - shown.length} more part(s) not shown` });
+    if (hidden) {
+      embed.setFooter({ text: `${hidden} more part(s) not shown` });
     }
   }
 
