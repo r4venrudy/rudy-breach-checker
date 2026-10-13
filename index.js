@@ -53,6 +53,9 @@ async function checkLeak(query) {
     return data;
   } catch (e) {
     if (e.name === 'TimeoutError') return { error: 'Breach API did not answer within 15 seconds' };
+    // undici only says "fetch failed"; the real reason (ENOTFOUND, ECONNREFUSED...) is in e.cause
+    console.error('Breach API request failed:', e.cause || e);
+    if (e.cause?.code) return { error: `Could not reach the breach API (${e.cause.code})` };
     return { error: e.message };
   }
 }
