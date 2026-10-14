@@ -21,11 +21,12 @@ try {
   ravenFail();
 }
 
-const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
 
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
-const { chunkLines, sourceLines, hashEmail, codeSpan, fitParts } = require('./packaging/format.cjs');
+const { hashEmail } = require('./packaging/format.cjs');
+const { createEmbed } = require('./packaging/embed.cjs');
 const { createCooldown } = require('./packaging/cooldown.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
@@ -58,49 +59,6 @@ async function checkLeak(query) {
     if (e.cause?.code) return { error: `Could not reach the breach API (${e.cause.code})` };
     return { error: e.message };
   }
-}
-
-function createEmbed(data, query, type) {
-  const embed = new EmbedBuilder()
-    .setColor(data.error ? '#ffa500' : data.found ? '#ff0000' : '#00ff00')
-    .setTitle('🔍 Rudy Breach Checker')
-    .setTimestamp();
-
-  if (data.error) {
-    embed.setDescription(`❌ Error: ${data.error}`);
-    return embed;
-  }
-
-  embed.addFields(
-    { name: 'Query', value: codeSpan(query), inline: true },
-    { name: 'Type', value: type, inline: true },
-    { name: 'Status', value: data.found ? '✅ Found in Breaches' : '❌ Not Found', inline: true }
-  );
-
-  if (data.found && data.sources) {
-    const arr = Array.isArray(data.sources) ? data.sources : [data.sources];
-    const lines = sourceLines(arr);
-    const parts = chunkLines(lines, 1024);
-    const { shown, hidden } = fitParts(parts);
-    shown.forEach((value, i) => {
-      embed.addFields({
-        name: shown.length === 1 ? `📋 Breaches Found (${arr.length})` : `📋 Breaches Found (Part ${i + 1})`,
-        value
-      });
-    });
-    if (hidden) {
-      embed.setFooter({ text: `${hidden} more part(s) not shown` });
-    }
-  }
-
-  if (data.found && data.fields) {
-    embed.addFields({
-      name: '📊 Exposed Data',
-      value: codeSpan(String(Array.isArray(data.fields) ? data.fields.join(', ') : data.fields).slice(0, 1000))
-    });
-  }
-
-  return embed;
 }
 
 const commands = [
