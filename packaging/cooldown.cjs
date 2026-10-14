@@ -15,4 +15,12 @@ function createCooldown(ms, now = () => Date.now()) {
   };
 }
 
-module.exports = { createCooldown };
+// COOLDOWN_SECONDS: empty, negative or non-numeric values fall back to the default
+// (Number('abc') is NaN, which silently disabled the cooldown)
+function secondsFromEnv(value, fallback) {
+  if (value === undefined || value === '') return fallback;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+module.exports = { createCooldown, secondsFromEnv };

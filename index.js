@@ -28,7 +28,7 @@ const { loadConfig } = require('./packaging/config.cjs');
 const { hashEmail } = require('./packaging/format.cjs');
 const { createEmbed } = require('./packaging/embed.cjs');
 const { checkLeak: checkLeakApi } = require('./packaging/api.cjs');
-const { createCooldown } = require('./packaging/cooldown.cjs');
+const { createCooldown, secondsFromEnv } = require('./packaging/cooldown.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
 if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
@@ -67,7 +67,7 @@ client.once('ready', () => {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const cooldown = createCooldown(Number(process.env.COOLDOWN_SECONDS || 10) * 1000);
+const cooldown = createCooldown(secondsFromEnv(process.env.COOLDOWN_SECONDS, 10) * 1000);
 
 const COMMANDS = new Set(['mail', 'hashmail', 'usernamev2']);
 
