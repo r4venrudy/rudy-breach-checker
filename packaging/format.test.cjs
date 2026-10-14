@@ -54,3 +54,12 @@ test('fitParts stops before the embed budget and counts what was left out', () =
   assert.strictEqual(hidden, 1);
   assert.deepStrictEqual(fitParts([]), { shown: [], hidden: 0 });
 });
+
+test('hashQuery passes a ready SHA-256 through and hashes addresses', () => {
+  const { hashQuery, hashEmail, isSha256 } = require('./format.cjs');
+  const h = hashEmail('a@b.co');
+  assert.equal(hashQuery(h.toUpperCase()), h);
+  assert.equal(hashQuery(' A@B.co '), h);
+  assert.ok(isSha256(h));
+  assert.ok(!isSha256('a@b.co'));
+});

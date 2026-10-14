@@ -5,6 +5,17 @@ function hashEmail(email) {
   return crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 }
 
+const SHA256_RE = /^[a-f0-9]{64}$/i;
+
+// /hashmail accepts either an address or a SHA-256 the user already computed
+function isSha256(text) {
+  return SHA256_RE.test(String(text).trim());
+}
+
+function hashQuery(input) {
+  return isSha256(input) ? input.trim().toLowerCase() : hashEmail(input);
+}
+
 // Packs lines into Discord embed field values (max 1024 characters each).
 function chunkLines(lines, limit) {
   const chunks = [];
@@ -49,4 +60,4 @@ function fitParts(parts, budget = 4500) {
   return { shown, hidden: parts.length - shown.length };
 }
 
-module.exports = { chunkLines, sourceLines, hashEmail, codeSpan, fitParts };
+module.exports = { chunkLines, sourceLines, hashEmail, hashQuery, isSha256, codeSpan, fitParts };

@@ -25,7 +25,7 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require
 
 // Prefer environment variables so secrets don't have to live in the source file.
 const { loadConfig } = require('./packaging/config.cjs');
-const { hashEmail } = require('./packaging/format.cjs');
+const { hashQuery, isSha256 } = require('./packaging/format.cjs');
 const { createEmbed } = require('./packaging/embed.cjs');
 const { checkLeak: checkLeakApi } = require('./packaging/api.cjs');
 const { createCooldown, secondsFromEnv } = require('./packaging/cooldown.cjs');
@@ -49,7 +49,7 @@ const commands = [
   new SlashCommandBuilder()
     .setName('hashmail')
     .setDescription('Search for leaks by hashed email (SHA256)')
-    .addStringOption(o => o.setName('email').setDescription('Email').setRequired(true).setMaxLength(254)),
+    .addStringOption(o => o.setName('email').setDescription('Email or its SHA-256').setRequired(true).setMaxLength(254)),
   new SlashCommandBuilder()
     .setName('usernamev2')
     .setDescription('Search for leaks by username')
@@ -76,7 +76,8 @@ async function handleCommand(interaction) {
   if (!COMMANDS.has(interaction.commandName)) return;
 
   const email = interaction.options.getString('email');
-  if (email !== null && !EMAIL_RE.test(email.trim())) {
+  const hashGiven = interaction.commandName === 'hashmail' && email !== null && isSha256(email);
+  if (email !== null && !hashGiven && !EMAIL_RE.test(email.trim())) {
     await interaction.reply({ content: '❌ That does not look like an email address.', ephemeral: true });
     return;
   }
@@ -106,7 +107,7 @@ async function handleCommand(interaction) {
 
   if (interaction.commandName === 'hashmail') {
     const email = interaction.options.getString('email');
-    query = hashEmail(email);
+    query = hashQuery(email);
     type = 'Hashed Email';
     result = await checkLeak(query);
   }
