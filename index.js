@@ -113,7 +113,8 @@ async function handleCommand(interaction) {
   }
 
   if (interaction.commandName === 'usernamev2') {
-    query = interaction.options.getString('username').trim();
+    // a name copied from a profile often starts with @, which no breach source stores
+    query = interaction.options.getString('username').trim().replace(/^@(?=.)/, '');
     type = 'Username';
     result = await checkLeak(query);
   }
