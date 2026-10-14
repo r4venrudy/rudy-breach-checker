@@ -127,6 +127,10 @@ client.on('interactionCreate', async interaction => {
     await handleCommand(interaction);
   } catch (err) {
     console.error(`/${interaction.commandName} failed:`, err);
+    // Without this the requester is left looking at "thinking..." until Discord gives up
+    if (interaction.deferred) {
+      await interaction.editReply({ content: '❌ The lookup failed, please try again.', embeds: [] }).catch(() => {});
+    }
   }
 });
 
