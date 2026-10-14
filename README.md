@@ -56,6 +56,7 @@ Invite the bot with `bot` and `applications.commands` scopes. Test with a consen
 
 ```text
 index.js                Slash commands and the breach API adapter
+packaging/api.cjs       Breach API request and response checks
 packaging/embed.cjs     Result embed (plain Discord API object)
 packaging/format.cjs    Hashing, source lines, size budget, markdown-safe code spans
 packaging/cooldown.cjs  Per-user cooldown

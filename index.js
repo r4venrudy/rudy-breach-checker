@@ -27,6 +27,7 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require
 const { loadConfig } = require('./packaging/config.cjs');
 const { hashEmail } = require('./packaging/format.cjs');
 const { createEmbed } = require('./packaging/embed.cjs');
+const { checkLeak: checkLeakApi } = require('./packaging/api.cjs');
 const { createCooldown } = require('./packaging/cooldown.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
@@ -38,28 +39,7 @@ const client = new Client({
 });
 
 
-async function checkLeak(query) {
-  try {
-    const url = new URL(apiUrl);
-    url.searchParams.set('check', query);
-    // Optional provider API key, sent as a header so it never appears in URLs or logs
-    const headers = process.env.LEAKCHECK_API_KEY
-      ? { [process.env.LEAKCHECK_API_KEY_HEADER || 'X-API-Key']: process.env.LEAKCHECK_API_KEY }
-      : {};
-    const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
-    if (!response.ok) return { error: `API returned status ${response.status}` };
-    const data = await response.json().catch(() => null);
-    // createEmbed relies on a boolean "found"; anything else means the provider speaks a different format
-    if (!data || typeof data.found !== 'boolean') return { error: 'Unexpected response from the breach API (missing "found")' };
-    return data;
-  } catch (e) {
-    if (e.name === 'TimeoutError') return { error: 'Breach API did not answer within 15 seconds' };
-    // undici only says "fetch failed"; the real reason (ENOTFOUND, ECONNREFUSED...) is in e.cause
-    console.error('Breach API request failed:', e.cause || e);
-    if (e.cause?.code) return { error: `Could not reach the breach API (${e.cause.code})` };
-    return { error: e.message };
-  }
-}
+const checkLeak = query => checkLeakApi(apiUrl, query);
 
 const commands = [
   new SlashCommandBuilder()
