@@ -96,7 +96,7 @@ function createEmbed(data, query, type) {
   if (data.found && data.fields) {
     embed.addFields({
       name: '📊 Exposed Data',
-      value: `\`${String(Array.isArray(data.fields) ? data.fields.join(', ') : data.fields).slice(0, 1000)}\``
+      value: codeSpan(String(Array.isArray(data.fields) ? data.fields.join(', ') : data.fields).slice(0, 1000))
     });
   }
 
