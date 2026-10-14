@@ -55,9 +55,14 @@ Invite the bot with `bot` and `applications.commands` scopes. Test with a consen
 ## Project map
 
 ```text
-index.js       Slash commands, query adapter, hashing and embeds
-package.json   Discord dependency
-raven.png      Required startup asset
+index.js                Slash commands and the breach API adapter
+packaging/embed.cjs     Result embed (plain Discord API object)
+packaging/format.cjs    Hashing, source lines, size budget, markdown-safe code spans
+packaging/cooldown.cjs  Per-user cooldown
+packaging/config.cjs    Environment / RUDY_CONFIG loading
+packaging/*.test.cjs    Tests (npm test)
+package.json            Discord dependency
+raven.png               Required startup asset
 ```
 
 ## GitHub package
