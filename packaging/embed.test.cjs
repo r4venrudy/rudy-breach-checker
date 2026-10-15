@@ -34,3 +34,9 @@ test('very long source lists stay under the embed limit and say how much was cut
   assert.ok(total < 6000);
   assert.match(e.footer.text, /more part\(s\) not shown/);
 });
+
+test('status reads as a warning when found and as good news when clean', () => {
+  const status = d => createEmbed(d, 'a@b.co', 'Email').fields.find(f => f.name === 'Status').value;
+  assert.equal(status({ found: true, sources: [] }), '⚠️ Found in breaches');
+  assert.equal(status({ found: false }), '✅ Not found in known breaches');
+});

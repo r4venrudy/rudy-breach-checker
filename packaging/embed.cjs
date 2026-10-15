@@ -20,7 +20,8 @@ function createEmbed(data, query, type, now = new Date()) {
   embed.fields.push(
     { name: 'Query', value: codeSpan(query), inline: true },
     { name: 'Type', value: type, inline: true },
-    { name: 'Status', value: data.found ? '✅ Found in Breaches' : '❌ Not Found', inline: true }
+    // being found is the bad outcome, so it gets the warning sign (matching the red embed colour)
+    { name: 'Status', value: data.found ? '⚠️ Found in breaches' : '✅ Not found in known breaches', inline: true }
   );
 
   if (data.found && data.sources) {
