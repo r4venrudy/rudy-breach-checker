@@ -22,7 +22,7 @@ A Discord bot that sends email, hashed-email or username queries to a configured
 | :--- | :--- |
 | `/mail` | Validates, trims and lowercases the email, then sends it as the endpoint's `check` query parameter |
 | `/hashmail` | Lowercases/trims the email, hashes it with SHA-256 and queries that hash; a 64-character SHA-256 is sent as is |
-| `/usernamev2` | Queries a supplied username (blank input is rejected) |
+| `/usernamev2` | Queries a supplied username; a leading `@` is dropped and blank input is rejected |
 | Response | Displays source names/dates and exposed-field labels when returned by the provider, only to the user who asked (ephemeral) |
 | Colors | Red = found in breaches, green = not found, orange = API error or unexpected response |
 | Limits | Each user waits `COOLDOWN_SECONDS` (default 10) between lookups; emails are capped at 254 characters and usernames at 64 |
