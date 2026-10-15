@@ -61,6 +61,10 @@ async function registerCommands() {
   await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
 }
 
+// discord.js emits 'error' for gateway and network failures; with no listener Node treats it as
+// an uncaught exception and the bot exits
+client.on('error', err => console.error('Discord client error:', err));
+
 client.once('ready', () => {
   console.log(`Bot aktif: ${client.user.tag}`);
 });
