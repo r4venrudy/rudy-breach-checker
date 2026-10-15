@@ -30,3 +30,8 @@ test('timeouts get their own message', async () => {
   const fetchImpl = async () => { const e = new Error('timed out'); e.name = 'TimeoutError'; throw e; };
   assert.match((await checkLeak(API, 'x', { fetchImpl, env: {} })).error, /within 15 seconds/);
 });
+
+test('rate limit and rejected key get plain messages', async () => {
+  assert.match((await checkLeak(API, 'x', { fetchImpl: reply(429, {}), env: {} })).error, /rate limit/);
+  assert.match((await checkLeak(API, 'x', { fetchImpl: reply(401, {}), env: {} })).error, /LEAKCHECK_API_KEY/);
+});

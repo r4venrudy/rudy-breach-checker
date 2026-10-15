@@ -8,6 +8,9 @@ async function checkLeak(apiUrl, query, { fetchImpl = fetch, env = process.env, 
       ? { [env.LEAKCHECK_API_KEY_HEADER || 'X-API-Key']: env.LEAKCHECK_API_KEY }
       : {};
     const response = await fetchImpl(url, { headers, signal: AbortSignal.timeout(15000) });
+    // providers rate-limit per key; say so plainly instead of a bare status code
+    if (response.status === 429) return { error: 'The breach API rate limit was reached, try again in a minute' };
+    if (response.status === 401 || response.status === 403) return { error: 'The breach API rejected the request (check LEAKCHECK_API_KEY)' };
     if (!response.ok) return { error: `API returned status ${response.status}` };
     const data = await response.json().catch(() => null);
     // createEmbed relies on a boolean "found"; anything else means the provider speaks a different format
