@@ -25,7 +25,7 @@ const { sourceLines } = require('./format.cjs');
 test('sourceLines numbers strings and named objects', () => {
   assert.deepStrictEqual(
     sourceLines(['Adobe', { name: 'LinkedIn', date: '2016-05' }, { name: 'Canva' }, { id: 7 }]),
-    ['1. Adobe', '2. LinkedIn (2016-05)', '3. Canva', '4. {"id":7}']
+    ['1. LinkedIn (2016-05)', '2. Adobe', '3. Canva', '4. {"id":7}']
   );
 });
 
@@ -62,4 +62,10 @@ test('hashQuery passes a ready SHA-256 through and hashes addresses', () => {
   assert.equal(hashQuery(' A@B.co '), h);
   assert.ok(isSha256(h));
   assert.ok(!isSha256('a@b.co'));
+});
+
+test('sourceLines lists the newest breach first', () => {
+  const { sourceLines } = require('./format.cjs');
+  assert.deepEqual(sourceLines([{ name: 'Old', date: '2016-10' }, 'NoDate', { name: 'New', date: '2023-05' }]),
+    ['1. New (2023-05)', '2. Old (2016-10)', '3. NoDate']);
 });
