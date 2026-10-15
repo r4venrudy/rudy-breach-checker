@@ -37,7 +37,17 @@ cd rudy-breach-checker
 npm install
 ```
 
-Set the `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API` environment variables (for example `DISCORD_TOKEN=... CLIENT_ID=... LEAKCHECK_API=... node index.js`). Startup rejects missing configuration before connecting to Discord. The endpoint must accept `?check=...` and return the response shape expected by `createEmbed`. If your provider needs a key, set `LEAKCHECK_API_KEY` (sent as the `X-API-Key` header, or the header named in `LEAKCHECK_API_KEY_HEADER`), so the key stays out of the URL.
+Set the `DISCORD_TOKEN`, `CLIENT_ID` and `LEAKCHECK_API` environment variables (for example `DISCORD_TOKEN=... CLIENT_ID=... LEAKCHECK_API=... node index.js`). Startup rejects missing configuration before connecting to Discord. The endpoint must accept `?check=...` and return JSON in this shape (anything without a boolean `found` is reported as an unexpected response):
+
+```json
+{
+  "found": true,
+  "sources": [{ "name": "ExampleForum", "date": "2023-05" }, "OtherSite"],
+  "fields": ["email", "password", "username"]
+}
+```
+
+`sources` entries can be plain names or `{ name, date }` objects (dated ones are listed newest first); `fields` lists the exposed data types. If your provider needs a key, set `LEAKCHECK_API_KEY` (sent as the `X-API-Key` header, or the header named in `LEAKCHECK_API_KEY_HEADER`), so the key stays out of the URL.
 
 ```bash
 node index.js
