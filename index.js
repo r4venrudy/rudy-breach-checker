@@ -29,6 +29,7 @@ const { hashQuery, isSha256 } = require('./packaging/format.cjs');
 const { createEmbed } = require('./packaging/embed.cjs');
 const { checkLeak: checkLeakApi } = require('./packaging/api.cjs');
 const { createCooldown, secondsFromEnv } = require('./packaging/cooldown.cjs');
+const { createSlots } = require('./packaging/concurrency.cjs');
 const { DISCORD_TOKEN, CLIENT_ID, LEAKCHECK_API } = loadConfig({ DISCORD_TOKEN:'DISCORD_TOKEN', CLIENT_ID:'CLIENT_ID', LEAKCHECK_API:'LEAKCHECK_API' });
 const apiUrl = new URL(LEAKCHECK_API);
 if (!['https:', 'http:'].includes(apiUrl.protocol)) throw new Error('LEAKCHECK_API must be an HTTP(S) endpoint');
@@ -72,6 +73,7 @@ client.once('ready', () => {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const cooldown = createCooldown(secondsFromEnv(process.env.COOLDOWN_SECONDS, 10) * 1000);
+const lookupSlots = createSlots(4);
 
 const COMMANDS = new Set(['mail', 'hashmail', 'usernamev2']);
 
@@ -92,39 +94,49 @@ async function handleCommand(interaction) {
     return;
   }
 
-  const wait = cooldown.take(interaction.user.id);
-  if (wait > 0) {
-    await interaction.reply({ content: `⏳ Please wait ${Math.ceil(wait / 1000)} s before the next lookup.`, ephemeral: true });
+  const releaseSlot = lookupSlots.tryAcquire();
+  if (!releaseSlot) {
+    await interaction.reply({ content: '⏳ Four lookups are already running. Please try again shortly.', ephemeral: true });
     return;
   }
 
-  // Breach results about a person's email are sensitive: show them only to the requester.
-  await interaction.deferReply({ ephemeral: true });
+  try {
+    const wait = cooldown.take(interaction.user.id);
+    if (wait > 0) {
+      await interaction.reply({ content: `⏳ Please wait ${Math.ceil(wait / 1000)} s before the next lookup.`, ephemeral: true });
+      return;
+    }
 
-  let query, type, result;
+    // Breach results about a person's email are sensitive: show them only to the requester.
+    await interaction.deferReply({ ephemeral: true });
 
-  if (interaction.commandName === 'mail') {
-    query = interaction.options.getString('email').trim().toLowerCase();
-    type = 'Email';
-    result = await checkLeak(query);
+    let query, type, result;
+
+    if (interaction.commandName === 'mail') {
+      query = interaction.options.getString('email').trim().toLowerCase();
+      type = 'Email';
+      result = await checkLeak(query);
+    }
+
+    if (interaction.commandName === 'hashmail') {
+      const email = interaction.options.getString('email');
+      query = hashQuery(email);
+      type = 'Hashed Email';
+      result = await checkLeak(query);
+    }
+
+    if (interaction.commandName === 'usernamev2') {
+      // a name copied from a profile often starts with @, which no breach source stores
+      query = interaction.options.getString('username').trim().replace(/^@(?=.)/, '');
+      type = 'Username';
+      result = await checkLeak(query);
+    }
+
+    const embed = createEmbed(result, query, type);
+    await interaction.editReply({ embeds: [embed] });
+  } finally {
+    releaseSlot();
   }
-
-  if (interaction.commandName === 'hashmail') {
-    const email = interaction.options.getString('email');
-    query = hashQuery(email);
-    type = 'Hashed Email';
-    result = await checkLeak(query);
-  }
-
-  if (interaction.commandName === 'usernamev2') {
-    // a name copied from a profile often starts with @, which no breach source stores
-    query = interaction.options.getString('username').trim().replace(/^@(?=.)/, '');
-    type = 'Username';
-    result = await checkLeak(query);
-  }
-
-  const embed = createEmbed(result, query, type);
-  await interaction.editReply({ embeds: [embed] });
 }
 
 client.on('interactionCreate', async interaction => {
