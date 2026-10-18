@@ -4,7 +4,7 @@ const { checkLeak } = require('./api.cjs');
 
 const API = 'https://breach.example/api';
 const quiet = () => {};
-const reply = (status, body) => async () => ({ ok: status < 400, status, json: async () => (typeof body === 'string' ? JSON.parse(body) : body) });
+const reply = (status, body) => async () => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
 test('sends the query as ?check= and the optional key as a header', async () => {
   let seen;
@@ -29,6 +29,20 @@ test('network failures name their cause', async () => {
 test('timeouts get their own message', async () => {
   const fetchImpl = async () => { const e = new Error('timed out'); e.name = 'TimeoutError'; throw e; };
   assert.match((await checkLeak(API, 'x', { fetchImpl, env: {} })).error, /within 15 seconds/);
+});
+
+test('rejects oversized API responses while reading the stream', async () => {
+  let cancelled = false;
+  const body = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('{"found":false,"padding":"' + 'x'.repeat(1024 * 1024)));
+    },
+    cancel() { cancelled = true; },
+  });
+  const fetchImpl = async () => new Response(body);
+  const result = await checkLeak(API, 'x', { fetchImpl, env: {} });
+  assert.match(result.error, /exceeded the 1 MiB limit/);
+  assert.equal(cancelled, true);
 });
 
 test('rate limit and rejected key get plain messages', async () => {
