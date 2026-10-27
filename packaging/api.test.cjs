@@ -6,6 +6,14 @@ const API = 'https://breach.example/api';
 const quiet = () => {};
 const reply = (status, body) => async () => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
+test('timeouts while reading a successful response retain the timeout diagnosis', async () => {
+  for (const name of ['TimeoutError', 'AbortError']) {
+    const body = new ReadableStream({ pull(controller) { controller.error(new DOMException('deadline elapsed', name)); } });
+    const result = await checkLeak(API, 'x', { fetchImpl: async () => new Response(body), env: {} });
+    assert.match(result.error, /within 15 seconds/);
+  }
+});
+
 test('HTTP error responses release unread bodies', async () => {
   for (const status of [401, 403, 429, 503]) {
     let cancelled = false;

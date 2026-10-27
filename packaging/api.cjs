@@ -44,13 +44,14 @@ async function checkLeak(apiUrl, query, { fetchImpl = fetch, env = process.env, 
       data = await readJsonBody(response);
     } catch (error) {
       if (error.code === 'RESPONSE_TOO_LARGE') return { error: error.message };
+      if (error.name === 'TimeoutError' || error.name === 'AbortError') throw error;
       data = null;
     }
     // createEmbed relies on a boolean "found"; anything else means the provider speaks a different format
     if (!data || typeof data.found !== 'boolean') return { error: 'Unexpected response from the breach API (missing "found")' };
     return data;
   } catch (e) {
-    if (e.name === 'TimeoutError') return { error: 'Breach API did not answer within 15 seconds' };
+    if (e.name === 'TimeoutError' || e.name === 'AbortError') return { error: 'Breach API did not answer within 15 seconds' };
     // undici only says "fetch failed"; the real reason (ENOTFOUND, ECONNREFUSED...) is in e.cause
     log('Breach API request failed:', e.cause || e);
     if (e.cause?.code) return { error: `Could not reach the breach API (${e.cause.code})` };
