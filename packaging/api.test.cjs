@@ -6,6 +6,16 @@ const API = 'https://breach.example/api';
 const quiet = () => {};
 const reply = (status, body) => async () => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
+test('HTTP error responses release unread bodies', async () => {
+  for (const status of [401, 403, 429, 503]) {
+    let cancelled = false;
+    const body = new ReadableStream({ cancel() { cancelled = true; } });
+    const result = await checkLeak(API, 'x', { fetchImpl: async () => new Response(body, { status }), env: {} });
+    assert.ok(result.error);
+    assert.equal(cancelled, true, `status ${status} retained its response body`);
+  }
+});
+
 test('sends the query as ?check= and the optional key as a header', async () => {
   let seen;
   const fetchImpl = async (url, opts) => { seen = { url: String(url), headers: opts.headers }; return reply(200, { found: false })(); };
