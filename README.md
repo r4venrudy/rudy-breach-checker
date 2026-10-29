@@ -99,3 +99,5 @@ Only public project files are packaged. Image tags are `latest` and `sha-<full c
 ---
 
 <p align="center">Part of the <a href="https://github.com/r4venrudy">r4venrudy</a> project collection.</p>
+
+Local configuration files must be UTF-8 JSON objects no larger than 64 KiB. Reads are bounded by bytes, and invalid UTF-8 is rejected before credential validation.

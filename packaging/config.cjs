@@ -1,8 +1,24 @@
 const fs = require('node:fs');
+function readConfigFile(filename) {
+  const fd = fs.openSync(filename, fs.constants.O_RDONLY | (fs.constants.O_NONBLOCK || 0));
+  try {
+    if (!fs.fstatSync(fd).isFile()) throw new Error('Configuration path must be a regular file');
+    const buffer = Buffer.alloc(65537);
+    let size = 0;
+    while (size < buffer.length) {
+      const count = fs.readSync(fd, buffer, size, buffer.length - size, null);
+      if (!count) break;
+      size += count;
+    }
+    if (size > 65536) throw new Error('Configuration file exceeds 64 KiB');
+    const text = new TextDecoder('utf-8', {fatal:true}).decode(buffer.subarray(0,size));
+    return JSON.parse(text.replace(/^\uFEFF/, ''));
+  } finally { fs.closeSync(fd); }
+}
 function loadConfig(spec, options = {}) {
   const env = options.env || process.env;
   const filename = options.filename || env.RUDY_CONFIG || 'config.json';
-  const data = fs.existsSync(filename) ? JSON.parse(fs.readFileSync(filename, 'utf8').replace(/^\uFEFF/, '')) : {};
+  const data = fs.existsSync(filename) ? readConfigFile(filename) : {};
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Configuration must be a JSON object');
   const result = {};
   for (const [key, variable] of Object.entries(spec)) result[key] = env[variable] || data[key] || '';
