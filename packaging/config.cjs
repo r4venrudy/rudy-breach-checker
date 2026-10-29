@@ -12,7 +12,8 @@ function readConfigFile(filename) {
     }
     if (size > 65536) throw new Error('Configuration file exceeds 64 KiB');
     const text = new TextDecoder('utf-8', {fatal:true}).decode(buffer.subarray(0,size));
-    return JSON.parse(text.replace(/^\uFEFF/, ''));
+    try { return JSON.parse(text.replace(/^\uFEFF/, '')); }
+    catch { throw new Error('Configuration must contain valid JSON'); }
   } finally { fs.closeSync(fd); }
 }
 function loadConfig(spec, options = {}) {
