@@ -32,7 +32,7 @@ function loadConfig(spec, options = {}) {
   const missing = Object.keys(result).filter(key => typeof result[key] !== 'string' || !result[key].trim() || /^(YOUR_|DISCORD TOKEN|YOUR CLIENT)/i.test(result[key]));
   if (missing.length) throw new Error('Missing configuration: ' + missing.map(key => spec[key]).join(', '));
   const clientId = result.clientId || result.CLIENT_ID;
-  if (clientId && !/^\d{17,22}$/.test(clientId)) throw new Error('CLIENT_ID must be a Discord application ID');
+  if (clientId && (!/^\d{17,22}$/.test(clientId) || BigInt(clientId) > 18446744073709551615n)) throw new Error('CLIENT_ID must be a Discord application ID within the unsigned 64-bit range');
   return result;
 }
 module.exports = { loadConfig };

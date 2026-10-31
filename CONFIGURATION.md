@@ -13,3 +13,7 @@ After trimming surrounding whitespace, embedded C0 control characters and DEL ar
 ## Unicode integrity
 
 Required setting values reject unpaired UTF-16 surrogate code points. Valid Unicode, including supplementary characters, is retained unchanged; the loader does not silently replace malformed credential text.
+
+## Application IDs
+
+Application IDs are compared as integer strings using BigInt, without floating-point rounding, and cannot exceed 18446744073709551615. This validates the [documented snowflake range](https://github.com/discord/discord-api-docs/blob/main/developers/reference.mdx); it does not authenticate an application or contact Discord.
