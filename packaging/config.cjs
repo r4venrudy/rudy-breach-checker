@@ -25,6 +25,8 @@ function loadConfig(spec, options = {}) {
   const result = {};
   for (const [key, variable] of Object.entries(spec)) result[key] = env[variable] || data[key] || '';
   for (const key of Object.keys(result)) if (typeof result[key] === 'string') result[key] = result[key].trim();
+  const controls = Object.keys(result).filter(key => typeof result[key] === 'string' && /[\u0000-\u001F\u007F]/.test(result[key]));
+  if (controls.length) throw new Error('Invalid control characters in configuration: ' + controls.map(key => spec[key]).join(', '));
   const missing = Object.keys(result).filter(key => typeof result[key] !== 'string' || !result[key].trim() || /^(YOUR_|DISCORD TOKEN|YOUR CLIENT)/i.test(result[key]));
   if (missing.length) throw new Error('Missing configuration: ' + missing.map(key => spec[key]).join(', '));
   const clientId = result.clientId || result.CLIENT_ID;
