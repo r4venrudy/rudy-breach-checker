@@ -19,6 +19,7 @@ function readConfigFile(filename) {
 function loadConfig(spec, options = {}) {
   const env = options.env || process.env;
   const filename = options.filename || env.RUDY_CONFIG || 'config.json';
+  if (!options.filename && env.RUDY_CONFIG && !fs.existsSync(filename)) throw new Error('RUDY_CONFIG must identify an existing regular file');
   const data = fs.existsSync(filename) ? readConfigFile(filename) : {};
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Configuration must be a JSON object');
   const result = {};
