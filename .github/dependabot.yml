@@ -1,0 +1,13 @@
+# Keep immutable workflow action pins current through reviewable weekly PRs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
+    cooldown:
+      default-days: 7
+    groups:
+      workflow-actions:
+        patterns: ['*']
