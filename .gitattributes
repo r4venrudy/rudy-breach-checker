@@ -1,0 +1,46 @@
+# Preserve binary evidence, native artifacts and archives byte for byte.
+*.bin binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.a binary
+*.lib binary
+*.o binary
+*.obj binary
+*.pdb binary
+*.dmp binary
+*.pcap binary
+*.pcapng binary
+*.wasm binary
+*.class binary
+*.jar binary
+*.zip binary
+*.gz binary
+*.xz binary
+*.bz2 binary
+*.7z binary
+*.nupkg binary
+*.snupkg binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.sqlite binary
+*.sqlite3 binary
+*.db binary
+*.wal binary
+*.der binary
+*.p12 binary
+*.pfx binary
+
+# Entrypoints must retain the line endings their interpreters require.
+*.sh text eol=lf
+*.bash text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
